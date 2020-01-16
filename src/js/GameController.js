@@ -125,15 +125,25 @@ export default class GameController {
       this.enemyPositionedTeam = load.enemyPos;
     }
     let theme;
-    if (this.level === 1) { theme = themes.prairie; }
-    if (this.level === 2) { theme = themes.desert; }
-    if (this.level === 3) { theme = themes.arctic; }
-    if (this.level === 4) { theme = themes.mountain; }
+    if (this.level === 1) {
+      theme = themes.prairie;
+    }
+    if (this.level === 2) {
+      theme = themes.desert;
+    }
+    if (this.level === 3) {
+      theme = themes.arctic;
+    }
+    if (this.level === 4) {
+      theme = themes.mountain;
+    }
     this.gamePlay.drawUi(theme);
     this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
     this.gamePlay.redrawPositions(this.positions);
     this.gamePlay.selectCell(this.selected.position);
-    if (this.turn === 'enemy') { this.enemyAction(); }
+    if (this.turn === 'enemy') {
+      this.enemyAction();
+    }
   }
 
   initUserTeam() {
@@ -141,7 +151,9 @@ export default class GameController {
       const checkArr = this.userPositionedTeam.map(item => item.position);
       const idx = getUserPos(user.length, checkArr);
       const positionedCharacter = new PositionedCharacter(character, idx);
-      this.userPositionedTeam = this.userPositionedTeam.concat(positionedCharacter);
+      this.userPositionedTeam = this.userPositionedTeam.concat(
+        positionedCharacter,
+      );
     });
     return this.userPositionedTeam;
   }
@@ -151,13 +163,18 @@ export default class GameController {
       const checkArr = this.enemyPositionedTeam.map(item => item.position);
       const idx = getEnemyPos(enemy.length, checkArr);
       const positionedCharacter = new PositionedCharacter(character, idx);
-      this.enemyPositionedTeam = this.enemyPositionedTeam.concat(positionedCharacter);
+      this.enemyPositionedTeam = this.enemyPositionedTeam.concat(
+        positionedCharacter,
+      );
     });
     return this.enemyPositionedTeam;
   }
 
   attack(index, attacker, target) {
-    const damage = Math.max(attacker.attack - target.defence, attacker.attack * 0.1);
+    const damage = Math.max(
+      attacker.attack - target.defence,
+      attacker.attack * 0.1,
+    );
     if (this.turn === undefined) {
       throw new TypeError('Что-то пошло не так');
     }
@@ -165,8 +182,12 @@ export default class GameController {
     if (target.health - damage <= 0) {
       this.gamePlay.deselectCell(index);
       console.log('killed');
-      this.enemyPositionedTeam = this.enemyPositionedTeam.filter(item => item.position !== index);
-      this.userPositionedTeam = this.userPositionedTeam.filter(item => item.position !== index);
+      this.enemyPositionedTeam = this.enemyPositionedTeam.filter(
+        item => item.position !== index,
+      );
+      this.userPositionedTeam = this.userPositionedTeam.filter(
+        item => item.position !== index,
+      );
       this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
       this.gamePlay.redrawPositions(this.positions);
       if (this.userPositionedTeam.length === 0) {
@@ -191,34 +212,57 @@ export default class GameController {
   enemyAction() {
     if (this.turn !== 'enemy') return;
     const getEnemyChar = () => {
-      const random = Math.floor(Math.random() * this.enemyPositionedTeam.length);
+      const random = Math.floor(
+        Math.random() * this.enemyPositionedTeam.length,
+      );
       const result = this.enemyPositionedTeam[random];
       return result;
     };
 
     if (getEnemyChar()) {
-      this.enemyAttackIndex = allowedAttack(getEnemyChar().position, getEnemyChar().character.distanceAttack);
-      this.enemyMoveIndex = allowedMove(getEnemyChar().position, getEnemyChar().character.distance);
+      this.enemyAttackIndex = allowedAttack(
+        getEnemyChar().position,
+        getEnemyChar().character.distanceAttack,
+      );
+      this.enemyMoveIndex = allowedMove(
+        getEnemyChar().position,
+        getEnemyChar().character.distance,
+      );
       // если в массиве атаки есть индекс команды игрока, то напасть
       for (const userPosition of this.userPositionedTeam) {
-        const attackCellKey = this.enemyAttackIndex.indexOf(userPosition.position);
+        const attackCellKey = this.enemyAttackIndex.indexOf(
+          userPosition.position,
+        );
         if (attackCellKey !== -1) {
           const attackCell = this.enemyAttackIndex[attackCellKey];
-          this.attack(attackCell, getEnemyChar().character, userPosition.character);
+          this.attack(
+            attackCell,
+            getEnemyChar().character,
+            userPosition.character,
+          );
           this.turn = 'user';
           return;
         }
-        this.newPos = allowedMove(getEnemyChar().position, getEnemyChar().character.distance);
-        this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
+        this.newPos = allowedMove(
+          getEnemyChar().position,
+          getEnemyChar().character.distance,
+        );
+        this.positions = this.userPositionedTeam.concat(
+          this.enemyPositionedTeam,
+        );
         const busyIndexes = this.positions.map(item => item.position);
-        const vacantIndexes = this.newPos.filter(item => busyIndexes.indexOf(item) === -1);
+        const vacantIndexes = this.newPos.filter(
+          item => busyIndexes.indexOf(item) === -1,
+        );
         const getEnemyPosition = () => {
           const random = Math.floor(Math.random() * vacantIndexes.length);
           const result = vacantIndexes[random];
           return result;
         };
         getEnemyChar().position = getEnemyPosition();
-        this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
+        this.positions = this.userPositionedTeam.concat(
+          this.enemyPositionedTeam,
+        );
         this.gamePlay.redrawPositions(this.positions);
         this.turn = 'user';
         return;
@@ -229,9 +273,15 @@ export default class GameController {
   levelUpChar(arr) {
     arr.forEach((item) => {
       item.character.level += 1;
-      const formula = (1.8 - item.character.health / 100);
-      const attack = Math.max(item.character.attack, item.character.attack * formula);
-      const defence = Math.max(item.character.defence, item.character.defence * formula);
+      const formula = 1.8 - item.character.health / 100;
+      const attack = Math.max(
+        item.character.attack,
+        item.character.attack * formula,
+      );
+      const defence = Math.max(
+        item.character.defence,
+        item.character.defence * formula,
+      );
 
       item.character.attack = Math.floor(attack);
       item.character.defence = Math.floor(defence);
@@ -253,10 +303,22 @@ export default class GameController {
 
     let theme;
     let n;
-    if (this.level === 1) { theme = themes.prairie; n = 2; }
-    if (this.level === 2) { theme = themes.desert; n = 1; }
-    if (this.level === 3) { theme = themes.arctic; n = 2; }
-    if (this.level === 4) { theme = themes.mountain; n = 2; }
+    if (this.level === 1) {
+      theme = themes.prairie;
+      n = 2;
+    }
+    if (this.level === 2) {
+      theme = themes.desert;
+      n = 1;
+    }
+    if (this.level === 3) {
+      theme = themes.arctic;
+      n = 2;
+    }
+    if (this.level === 4) {
+      theme = themes.mountain;
+      n = 2;
+    }
 
     this.gamePlay.drawUi(theme);
 
@@ -266,12 +328,18 @@ export default class GameController {
     const newEnemyTeam = generateTeam(enemyTeam, this.level, n + this.alive);
 
     newUserTeam.forEach((character) => {
-      const positionedCharacter = new PositionedCharacter(character, getUserPos());
+      const positionedCharacter = new PositionedCharacter(
+        character,
+        getUserPos(5, this.userPositionedTeam),
+      );
       this.userPositionedTeam.push(positionedCharacter);
     });
 
     newEnemyTeam.forEach((character) => {
-      const positionedCharacter = new PositionedCharacter(character, getEnemyPos());
+      const positionedCharacter = new PositionedCharacter(
+        character,
+        getEnemyPos(5, this.enemyPositionedTeam),
+      );
       this.enemyPositionedTeam.push(positionedCharacter);
     });
 
@@ -283,17 +351,32 @@ export default class GameController {
     // TODO: react to click
     if (this.lock) this.init();
     const selectedHero = this.positions.filter(i => i.position === index);
-    if (selectedHero[0] !== undefined && userTypes.includes(selectedHero[0].character.type)) {
+    if (
+      selectedHero[0] !== undefined
+      && userTypes.includes(selectedHero[0].character.type)
+    ) {
       if (this.selected) {
         this.gamePlay.deselectCell(this.selected.position);
       }
       this.gamePlay.selectCell(index);
       this.selected = selectedHero[0];
-      this.attackIndex = allowedAttack(this.selected.position, this.selected.character.distanceAttack);
-      this.moveIndex = allowedMove(this.selected.position, this.selected.character.distance);
+      this.attackIndex = allowedAttack(
+        this.selected.position,
+        this.selected.character.distanceAttack,
+      );
+      this.moveIndex = allowedMove(
+        this.selected.position,
+        this.selected.character.distance,
+      );
     } else if (this.selected) {
-      if (this.attackIndex.includes(index) && selectedHero.length && enemyTypes.includes(selectedHero[0].character.type)) {
-        const target = this.enemyPositionedTeam.filter(item => item.position === index);
+      if (
+        this.attackIndex.includes(index)
+        && selectedHero.length
+        && enemyTypes.includes(selectedHero[0].character.type)
+      ) {
+        const target = this.enemyPositionedTeam.filter(
+          item => item.position === index,
+        );
         this.attack(index, this.selected.character, target[0].character);
         this.gamePlay.deselectCell(this.selected.position);
         this.turn = 'enemy';
@@ -304,7 +387,9 @@ export default class GameController {
         }
         this.gamePlay.deselectCell(this.selected.position);
         this.selected.position = index;
-        this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
+        this.positions = this.userPositionedTeam.concat(
+          this.enemyPositionedTeam,
+        );
         this.gamePlay.redrawPositions(this.positions);
         this.gamePlay.selectCell(index);
         this.turn = 'enemy';
@@ -323,19 +408,34 @@ export default class GameController {
       const shortInfo = heroInfo(selectedHero[0].character);
 
       for (const i of this.positions) {
-        if (i.position === index && userTypes.includes(selectedHero[0].character.type)) {
+        if (
+          i.position === index
+          && userTypes.includes(selectedHero[0].character.type)
+        ) {
           this.gamePlay.setCursor(cursors.pointer);
           this.gamePlay.showCellTooltip(shortInfo, index);
-        } else if (i.position === index && enemyTypes.includes(selectedHero[0].character.type)) {
+        } else if (
+          i.position === index
+          && enemyTypes.includes(selectedHero[0].character.type)
+        ) {
           this.gamePlay.setCursor(cursors.notallowed);
           this.gamePlay.showCellTooltip(shortInfo, index);
         }
       }
     }
-    if (this.selected && this.moveIndex.includes(index) && !selectedHero.length) {
+    if (
+      this.selected
+      && this.moveIndex.includes(index)
+      && !selectedHero.length
+    ) {
       this.gamePlay.setCursor(cursors.pointer);
       this.gamePlay.selectCell(index, 'green');
-    } else if (this.selected && this.attackIndex.includes(index) && selectedHero.length && enemyTypes.includes(selectedHero[0].character.type)) {
+    } else if (
+      this.selected
+      && this.attackIndex.includes(index)
+      && selectedHero.length
+      && enemyTypes.includes(selectedHero[0].character.type)
+    ) {
       this.gamePlay.setCursor(cursors.crosshair);
       this.gamePlay.selectCell(index, 'red');
     }
