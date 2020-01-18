@@ -114,6 +114,7 @@ export default class GameController {
   }
 
   onLoadGame() {
+    const gamePlay = this.gamePlay;
     const load = this.stateService.load();
     if (load) {
       this.level = load.level;
@@ -125,22 +126,23 @@ export default class GameController {
       this.enemyPositionedTeam = load.enemyPos;
     }
     let theme;
-    if (this.level === 1) {
+    const level = this.level;
+    if (level === 1) {
       theme = themes.prairie;
     }
-    if (this.level === 2) {
+    if (level === 2) {
       theme = themes.desert;
     }
-    if (this.level === 3) {
+    if (level === 3) {
       theme = themes.arctic;
     }
-    if (this.level === 4) {
+    if (level === 4) {
       theme = themes.mountain;
     }
-    this.gamePlay.drawUi(theme);
+    gamePlay.drawUi(theme);
     this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
-    this.gamePlay.redrawPositions(this.positions);
-    this.gamePlay.selectCell(this.selected.position);
+    gamePlay.redrawPositions(this.positions);
+    gamePlay.selectCell(this.selected.position);
     if (this.turn === 'enemy') {
       this.enemyAction();
     }
@@ -171,6 +173,7 @@ export default class GameController {
   }
 
   attack(index, attacker, target) {
+    const gamePlay = this.gamePlay;
     const damage = Math.max(
       attacker.attack - target.defence,
       attacker.attack * 0.1,
@@ -180,7 +183,7 @@ export default class GameController {
     }
     target.health -= damage;
     if (target.health - damage <= 0) {
-      this.gamePlay.deselectCell(index);
+      gamePlay.deselectCell(index);
       console.log('killed');
       this.enemyPositionedTeam = this.enemyPositionedTeam.filter(
         item => item.position !== index,
@@ -189,23 +192,24 @@ export default class GameController {
         item => item.position !== index,
       );
       this.positions = this.userPositionedTeam.concat(this.enemyPositionedTeam);
-      this.gamePlay.redrawPositions(this.positions);
-      if (this.userPositionedTeam.length === 0) {
-        this.lock = true;
-        alert('Game over');
-      } else if (this.enemyPositionedTeam.length === 0) {
-        this.selected = '';
-        this.userPositionedTeam.forEach((item) => {
-          this.score += item.character.health;
-        });
-        this.alive = this.userPositionedTeam.length;
-
-        alert(`${this.level + 1} уровень. Вы набрали ${this.score} очков `);
-        this.levelUp();
-      }
+      gamePlay.redrawPositions(this.positions);
     }
-    this.gamePlay.showDamage(index, damage).then(() => {
-      this.gamePlay.redrawPositions(this.positions);
+    if (this.userPositionedTeam.length === 0) {
+      this.lock = true;
+      alert('Game over');
+    } else if (this.enemyPositionedTeam.length === 0) {
+      this.selected = '';
+      this.userPositionedTeam.forEach((item) => {
+        this.score += item.character.health;
+      });
+      this.alive = this.userPositionedTeam.length;
+
+      alert(`${this.level + 1} уровень. Вы набрали ${this.score} очков `);
+      this.levelUp();
+    }
+
+    gamePlay.showDamage(index, damage).then(() => {
+      gamePlay.redrawPositions(this.positions);
     });
   }
 
@@ -302,30 +306,34 @@ export default class GameController {
     }
 
     let theme;
-    let n;
+    let themeIndex;
     if (this.level === 1) {
       theme = themes.prairie;
-      n = 2;
+      themeIndex = 2;
     }
     if (this.level === 2) {
       theme = themes.desert;
-      n = 1;
+      themeIndex = 1;
     }
     if (this.level === 3) {
       theme = themes.arctic;
-      n = 2;
+      themeIndex = 2;
     }
     if (this.level === 4) {
       theme = themes.mountain;
-      n = 2;
+      themeIndex = 2;
     }
 
     this.gamePlay.drawUi(theme);
 
     this.levelUpChar(this.userPositionedTeam);
 
-    const newUserTeam = generateTeam(userTeam, this.level - 1, n);
-    const newEnemyTeam = generateTeam(enemyTeam, this.level, n + this.alive);
+    const newUserTeam = generateTeam(userTeam, this.level - 1, themeIndex);
+    const newEnemyTeam = generateTeam(
+      enemyTeam,
+      this.level,
+      themeIndex + this.alive,
+    );
 
     newUserTeam.forEach((character) => {
       const positionedCharacter = new PositionedCharacter(
@@ -351,14 +359,15 @@ export default class GameController {
     // TODO: react to click
     if (this.lock) this.init();
     const selectedHero = this.positions.filter(i => i.position === index);
+    const gamePlay = this.gamePlay;
     if (
       selectedHero[0] !== undefined
       && userTypes.includes(selectedHero[0].character.type)
     ) {
       if (this.selected) {
-        this.gamePlay.deselectCell(this.selected.position);
+        gamePlay.deselectCell(this.selected.position);
       }
-      this.gamePlay.selectCell(index);
+      gamePlay.selectCell(index);
       this.selected = selectedHero[0];
       this.attackIndex = allowedAttack(
         this.selected.position,
@@ -378,20 +387,20 @@ export default class GameController {
           item => item.position === index,
         );
         this.attack(index, this.selected.character, target[0].character);
-        this.gamePlay.deselectCell(this.selected.position);
+        gamePlay.deselectCell(this.selected.position);
         this.turn = 'enemy';
         this.enemyAction();
       } else if (this.moveIndex.includes(index)) {
         if (this.turn !== 'user') {
           this.enemyAction();
         }
-        this.gamePlay.deselectCell(this.selected.position);
+        gamePlay.deselectCell(this.selected.position);
         this.selected.position = index;
         this.positions = this.userPositionedTeam.concat(
           this.enemyPositionedTeam,
         );
-        this.gamePlay.redrawPositions(this.positions);
-        this.gamePlay.selectCell(index);
+        gamePlay.redrawPositions(this.positions);
+        gamePlay.selectCell(index);
         this.turn = 'enemy';
         this.enemyAction();
       } else {
@@ -402,6 +411,7 @@ export default class GameController {
 
   onCellEnter(index) {
     // TODO: react to mouse enter
+    const gamePlay = this.gamePlay;
     if (this.lock) this.init();
     const selectedHero = this.positions.filter(i => i.position === index);
     if (selectedHero[0] !== undefined) {
@@ -412,14 +422,14 @@ export default class GameController {
           i.position === index
           && userTypes.includes(selectedHero[0].character.type)
         ) {
-          this.gamePlay.setCursor(cursors.pointer);
-          this.gamePlay.showCellTooltip(shortInfo, index);
+          gamePlay.setCursor(cursors.pointer);
+          gamePlay.showCellTooltip(shortInfo, index);
         } else if (
           i.position === index
           && enemyTypes.includes(selectedHero[0].character.type)
         ) {
-          this.gamePlay.setCursor(cursors.notallowed);
-          this.gamePlay.showCellTooltip(shortInfo, index);
+          gamePlay.setCursor(cursors.notallowed);
+          gamePlay.showCellTooltip(shortInfo, index);
         }
       }
     }
@@ -428,25 +438,26 @@ export default class GameController {
       && this.moveIndex.includes(index)
       && !selectedHero.length
     ) {
-      this.gamePlay.setCursor(cursors.pointer);
-      this.gamePlay.selectCell(index, 'green');
+      gamePlay.setCursor(cursors.pointer);
+      gamePlay.selectCell(index, 'green');
     } else if (
       this.selected
       && this.attackIndex.includes(index)
       && selectedHero.length
       && enemyTypes.includes(selectedHero[0].character.type)
     ) {
-      this.gamePlay.setCursor(cursors.crosshair);
-      this.gamePlay.selectCell(index, 'red');
+      gamePlay.setCursor(cursors.crosshair);
+      gamePlay.selectCell(index, 'red');
     }
   }
 
   onCellLeave(index) {
     // TODO: react to mouse leave
+    const gamePlay = this.gamePlay;
     if (this.selected.position !== index) {
-      this.gamePlay.deselectCell(index);
+      gamePlay.deselectCell(index);
     }
-    this.gamePlay.setCursor(cursors.auto);
-    this.gamePlay.hideCellTooltip(index);
+    gamePlay.setCursor(cursors.auto);
+    gamePlay.hideCellTooltip(index);
   }
 }

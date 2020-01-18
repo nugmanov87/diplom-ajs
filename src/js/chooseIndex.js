@@ -51,22 +51,38 @@ export function allowedMove(position, distance) {
   const allowedIndex = [];
   for (let i = 1; i <= distance; i += 1) {
     let allowedCol = indexCol + i;
-    if (allowedCol < boardSize) { allowedIndex.push(allBoard[indexStr][allowedCol]); }
+    if (allowedCol < boardSize) {
+      allowedIndex.push(allBoard[indexStr][allowedCol]);
+    }
 
     let allowedStr = indexStr + i;
-    if (allowedStr < boardSize) { allowedIndex.push(allBoard[allowedStr][indexCol]); }
-    if ((allowedCol < boardSize) && (allowedStr < boardSize)) { allowedIndex.push(allBoard[allowedStr][allowedCol]); }
+    if (allowedStr < boardSize) {
+      allowedIndex.push(allBoard[allowedStr][indexCol]);
+    }
+    if (allowedCol < boardSize && allowedStr < boardSize) {
+      allowedIndex.push(allBoard[allowedStr][allowedCol]);
+    }
 
     allowedCol = indexCol - i;
-    if (allowedCol >= 0) { allowedIndex.push(allBoard[indexStr][allowedCol]); }
-    if ((allowedCol >= 0) && (allowedStr < boardSize)) { allowedIndex.push(allBoard[allowedStr][allowedCol]); }
+    if (allowedCol >= 0) {
+      allowedIndex.push(allBoard[indexStr][allowedCol]);
+    }
+    if (allowedCol >= 0 && allowedStr < boardSize) {
+      allowedIndex.push(allBoard[allowedStr][allowedCol]);
+    }
 
     allowedStr = indexStr - i;
-    if (allowedStr >= 0) { allowedIndex.push(allBoard[allowedStr][indexCol]); }
-    if ((allowedCol >= 0) && (allowedStr >= 0)) { allowedIndex.push(allBoard[allowedStr][allowedCol]); }
+    if (allowedStr >= 0) {
+      allowedIndex.push(allBoard[allowedStr][indexCol]);
+    }
+    if (allowedCol >= 0 && allowedStr >= 0) {
+      allowedIndex.push(allBoard[allowedStr][allowedCol]);
+    }
 
     allowedCol = indexCol + i;
-    if ((allowedCol < boardSize) && (allowedStr >= 0)) { allowedIndex.push(allBoard[allowedStr][allowedCol]); }
+    if (allowedCol < boardSize && allowedStr >= 0) {
+      allowedIndex.push(allBoard[allowedStr][allowedCol]);
+    }
   }
   return allowedIndex;
 }
