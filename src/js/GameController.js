@@ -338,7 +338,7 @@ export default class GameController {
     newUserTeam.forEach((character) => {
       const positionedCharacter = new PositionedCharacter(
         character,
-        getUserPos(5, this.userPositionedTeam),
+        getUserPos(Infinity, this.userPositionedTeam),
       );
       this.userPositionedTeam.push(positionedCharacter);
     });
@@ -346,7 +346,7 @@ export default class GameController {
     newEnemyTeam.forEach((character) => {
       const positionedCharacter = new PositionedCharacter(
         character,
-        getEnemyPos(5, this.enemyPositionedTeam),
+        getEnemyPos(Infinity, this.enemyPositionedTeam),
       );
       this.enemyPositionedTeam.push(positionedCharacter);
     });
